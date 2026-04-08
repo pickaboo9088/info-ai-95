@@ -63,9 +63,9 @@ const provinceGrid = {
         // Sidebar ranking globals (must be declared before Papa.parse runs synchronously)
         var _districtInfoMap = null;
         var PARTY_HEX = {
-            'ประชาชน': '#f97316', 'เพื่อไทย': '#ef4444', 'ภูมิใจไทย': '#1e3a8a',
-            'กล้าธรรม': '#84cc16', 'พลังประชารัฐ': '#166534', 'ประชาธิปัตย์': '#38bdf8',
-            'ไทรวมพลัง': '#db2777', 'ประชาชาติ': '#b45309', 'ไทยสร้างไทย': '#9333ea'
+            'ประชาชน': '#ff5a00', 'เพื่อไทย': '#ef4444', 'ภูมิใจไทย': '#2563eb',
+            'กล้าธรรม': '#84cc16', 'พลังประชารัฐ': '#16a34a', 'ประชาธิปัตย์': '#38bdf8',
+            'ไทรวมพลัง': '#ec4899', 'ประชาชาติ': '#d97706', 'ไทยสร้างไทย': '#a855f7'
         };
         var REGION_MAP = {
             'north': ['เชียงราย','พะเยา','น่าน','เชียงใหม่','แม่ฮ่องสอน','ลำพูน','ลำปาง','แพร่','อุตรดิตถ์','สุโขทัย','ตาก','กำแพงเพชร','พิษณุโลก','พิจิตร','เพชรบูรณ์','นครสวรรค์','อุทัยธานี'],
@@ -81,10 +81,11 @@ const provinceGrid = {
         tooltip.id = 'custom-tooltip';
         tooltip.style.cssText = `
             position: fixed; z-index:9999; pointer-events:none; display:none;
-            background: rgba(15,23,42,0.97); color:#f8fafc;
-            border-radius:10px; padding:10px 14px; font-size:0.82rem;
-            line-height:1.6; max-width:240px; box-shadow:0 8px 24px rgba(0,0,0,0.35);
-            border:1px solid rgba(255,255,255,0.08); font-family:inherit;
+            background: rgba(255,255,255,0.98); color:#0f172a;
+            border-radius:12px; padding:12px 16px; font-size:0.82rem;
+            line-height:1.6; max-width:260px; box-shadow:0 8px 32px rgba(0,0,0,0.12);
+            border:1px solid #e2e8f0; font-family:inherit;
+            backdrop-filter:blur(16px);
         `;
         document.body.appendChild(tooltip);
 
@@ -142,40 +143,38 @@ const provinceGrid = {
             const focusIdx = scores.findIndex(s => s.party === FOCUS_PARTY);
             const r1 = scores[0];
 
-            let html = `<div style="font-weight:700;margin-bottom:6px;color:#93c5fd;">📍 ${province} เขต ${district}</div>`;
+            let html = `<div style="font-weight:700;margin-bottom:6px;color:#f97316;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:6px;">📍 ${province} เขต ${district}</div>`;
 
             if (focusIdx === 0) {
                 // ประชาชน is #1 — compare with #2
                 const r2 = scores[1];
-                html += `<div style="display:flex;justify-content:space-between;gap:16px">`;
-                html += `<div>🥇 <b>${r1.party}</b><br><span style="color:#fbbf24">${fmt(r1.votes)} คะแนน</span></div>`;
-                if (r2) html += `<div>🥈 ${r2.party}<br><span style="color:#94a3b8">${fmt(r2.votes)} คะแนน</span></div>`;
+                html += `<div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:4px;">`;
+                html += `<div><span style="font-size:1rem;">🥇</span> <b>${r1.party}</b></div><div style="color:#fbbf24;font-weight:700;">${fmt(r1.votes)}</div>`;
                 html += `</div>`;
                 if (r2) {
+                    html += `<div style="display:flex;justify-content:space-between;gap:16px;">`;
+                    html += `<div><span style="font-size:1rem;">🥈</span> ${r2.party}</div><div style="color:#94a3b8;">${fmt(r2.votes)}</div>`;
+                    html += `</div>`;
                     const gap = r1.votes - r2.votes;
-                    html += `<div style="margin-top:6px;color:#34d399;font-size:0.75rem">ชนะห่าง ${fmt(gap)} คะแนน</div>`;
+                    html += `<div style="margin-top:8px;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.1);color:#34d399;font-weight:700;">▲ ชนะห่าง ${fmt(gap)} คะแนน</div>`;
                 }
-            } else if (focusIdx === 1) {
-                // ประชาชน is #2 — show #1 vs ประชาชน
-                const focus = scores[1];
-                html += `<div style="display:flex;justify-content:space-between;gap:16px">`;
-                html += `<div>🥇 <b>${r1.party}</b><br><span style="color:#fbbf24">${fmt(r1.votes)} คะแนน</span></div>`;
-                html += `<div>🥈 ${FOCUS_PARTY}<br><span style="color:#94a3b8">${fmt(focus.votes)} คะแนน</span></div>`;
+            } else if (focusIdx > 0) {
+                // ประชาชน is #2 or lower
+                const focus = scores[focusIdx];
+                html += `<div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:4px;">`;
+                html += `<div><span style="font-size:1rem;">🥇</span> <b>${r1.party}</b></div><div style="color:#fbbf24;font-weight:700;">${fmt(r1.votes)}</div>`;
+                html += `</div>`;
+                html += `<div style="display:flex;justify-content:space-between;gap:16px;">`;
+                html += `<div><span style="font-size:1rem;opacity:0.6;">🎯</span> ${FOCUS_PARTY} (อันดับ ${focusIdx+1})</div><div style="color:#94a3b8;">${fmt(focus.votes)}</div>`;
                 html += `</div>`;
                 const gap = r1.votes - focus.votes;
-                html += `<div style="margin-top:6px;color:#f87171;font-size:0.75rem">ประชาชนแพ้ห่าง ${fmt(gap)} คะแนน</div>`;
+                html += `<div style="margin-top:8px;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.1);color:#f87171;font-weight:700;">▼ ตามหลัง ${fmt(gap)} คะแนน</div>`;
             } else {
-                // ประชาชน is #3+ or not present — show #1 and ประชาชน's rank
-                html += `<div>🥇 <b>${r1.party}</b>&nbsp;<span style="color:#fbbf24">${fmt(r1.votes)} คะแนน</span></div>`;
-                if (focusIdx > 1) {
-                    const focus = scores[focusIdx];
-                    const gap = r1.votes - focus.votes;
-                    html += `<div style="margin-top:5px;opacity:0.8">`;
-                    html += `<span style="color:#94a3b8">อันดับ ${focusIdx + 1} ${FOCUS_PARTY}</span>&nbsp;${fmt(focus.votes)} คะแนน`;
-                    html += `<br><span style="color:#f87171;font-size:0.75rem">แพ้ห่าง ${fmt(gap)} คะแนน</span></div>`;
-                } else {
-                    html += `<div style="margin-top:5px;opacity:0.6;color:#94a3b8">${FOCUS_PARTY}: ไม่มีข้อมูล</div>`;
-                }
+                // ประชาชน not present
+                html += `<div style="display:flex;justify-content:space-between;gap:16px;">`;
+                html += `<div><span style="font-size:1rem;">🥇</span> <b>${r1.party}</b></div><div style="color:#fbbf24;font-weight:700;">${fmt(r1.votes)}</div>`;
+                html += `</div>`;
+                html += `<div style="margin-top:8px;opacity:0.6;color:#94a3b8;">ไม่พบข้อมูลพรรคประชาชน</div>`;
             }
             return html;
         }
@@ -210,9 +209,23 @@ const provinceGrid = {
                     seatEl.className = 'seat';
                     seatEl.dataset.district = seat.district;
                     seatEl.textContent = seat.district;
-                    seatEl.style.backgroundColor = getPartyColor(seat.party);
-                    attachTooltip(seatEl, seat.district, province, () =>
-                        (constituencyScores[province] || {})[seat.district] || []);
+                    
+                    const scores = (constituencyScores[province] || {})[seat.district] || [];
+                    let bg = getPartyColor(seat.party);
+                    seatEl.style.color = '#fff';
+
+                    if (seat.party === FOCUS_PARTY && scores.length > 1 && scores[0].party === FOCUS_PARTY) {
+                        const total = scores.reduce((sum, s) => sum + s.votes, 0);
+                        if (total > 0) {
+                            const marginPct = (scores[0].votes - scores[1].votes) / total;
+                            if (marginPct < 0.05) { bg = '#fdba74'; seatEl.style.color = '#7c2d12'; }
+                            else if (marginPct < 0.15) { bg = '#fb923c'; }
+                            else { bg = '#ff5a00'; }
+                        }
+                    }
+                    
+                    seatEl.style.backgroundColor = bg;
+                    attachTooltip(seatEl, seat.district, province, () => scores);
                     seatEl.addEventListener('click', () => {
                         window.highlightSidebarCard(province, seat.district);
                         if (window.zoomToProvinceDistrict) window.zoomToProvinceDistrict(province, seat.district);
@@ -290,17 +303,28 @@ const provinceGrid = {
                     parseInt(a.district) - parseInt(b.district));
 
                 sorted.forEach(seat => {
-                    const plParty = (partylistWinners[province] || {})[seat.district]
-                                    || seat.party;
+                    const plParty = (partylistWinners[province] || {})[seat.district] || seat.party;
                     const seatEl = document.createElement('div');
                     seatEl.className = 'seat';
                     seatEl.dataset.district = seat.district;
                     seatEl.textContent = seat.district;
-                    seatEl.style.backgroundColor = getPartyColor(plParty);
-                    // Partylist tooltip uses partylist scores
-                    attachTooltip(seatEl, seat.district, province, () => {
-                        return (partylistScores && partylistScores[province] && partylistScores[province][seat.district]) || [];
-                    });
+                    
+                    const scores = (partylistScores && partylistScores[province] && partylistScores[province][seat.district]) || [];
+                    let bg = getPartyColor(plParty);
+                    seatEl.style.color = '#fff';
+
+                    if (plParty === FOCUS_PARTY && scores.length > 1 && scores[0].party === FOCUS_PARTY) {
+                        const total = scores.reduce((sum, s) => sum + s.votes, 0);
+                        if (total > 0) {
+                            const marginPct = (scores[0].votes - scores[1].votes) / total;
+                            if (marginPct < 0.05) { bg = '#fdba74'; seatEl.style.color = '#7c2d12'; }
+                            else if (marginPct < 0.15) { bg = '#fb923c'; }
+                            else { bg = '#ff5a00'; }
+                        }
+                    }
+
+                    seatEl.style.backgroundColor = bg;
+                    attachTooltip(seatEl, seat.district, province, () => scores);
                     seatEl.addEventListener('click', () => {
                         window.highlightSidebarCard(province, seat.district);
                         if (window.zoomToProvinceDistrict) window.zoomToProvinceDistrict(province, seat.district);
@@ -342,16 +366,86 @@ const provinceGrid = {
             return el;
         }
 
+        // ── Render Turnout Heatmap view (Non-voters) ─────────────────────
+        function renderTurnout(mapContainer) {
+            buildConstituencyScores();
+            const di = getDistrictInfoMap();
+            mapContainer.innerHTML = '';
+            
+            Object.keys(provincesData).forEach(province => {
+                const el = createProvinceEl(province);
+                const seatsContainer = document.createElement('div');
+                seatsContainer.className = 'seats-container';
+
+                const sorted = [...provincesData[province]].sort((a, b) =>
+                    parseInt(a.district) - parseInt(b.district));
+
+                sorted.forEach(seat => {
+                    const seatEl = document.createElement('div');
+                    seatEl.className = 'seat';
+                    seatEl.dataset.district = seat.district;
+                    seatEl.textContent = seat.district;
+                    
+                    const key = `${province}|${seat.district}`;
+                    const info = di[key] || {};
+                    let nonVoterPct = 0;
+                    if (info.eligible > 0) nonVoterPct = 1 - (info.voted / info.eligible);
+                    
+                    // Heatmap logic for non-voters (higher non-voters = darker red)
+                    let bg = '#fee2e2'; seatEl.style.color = '#7f1d1d';
+                    if (nonVoterPct > 0.35) { bg = '#7f1d1d'; seatEl.style.color = '#fff'; }
+                    else if (nonVoterPct > 0.28) { bg = '#b91c1c'; seatEl.style.color = '#fff'; }
+                    else if (nonVoterPct > 0.22) { bg = '#ef4444'; seatEl.style.color = '#fff'; }
+                    else if (nonVoterPct > 0.15) { bg = '#fca5a5'; seatEl.style.color = '#7f1d1d'; }
+
+                    seatEl.style.backgroundColor = bg;
+                    
+                    // Mark if Prachachon lost
+                    const csScores = (constituencyScores[province] || {})[seat.district] || [];
+                    if (csScores.length > 0 && csScores[0].party !== FOCUS_PARTY) {
+                        seatEl.classList.add('lost');
+                    }
+
+                    attachTooltip(seatEl, seat.district, province, () => csScores);
+                    
+                    seatEl.addEventListener('click', () => {
+                        window.highlightSidebarCard(province, seat.district);
+                        if (window.zoomToProvinceDistrict) window.zoomToProvinceDistrict(province, seat.district);
+                    });
+                    seatsContainer.appendChild(seatEl);
+                });
+
+                el.appendChild(seatsContainer);
+                mapContainer.appendChild(el);
+            });
+        }
+
         // ── Public toggle function (called from HTML buttons) ─────────────
         function setView(view) {
             currentView = view;
             const mapContainer = document.getElementById('map-container');
             document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`btn-${view}`).classList.add('active');
+
+            // Toggle scenario section visibility
+            const scenarioSection = document.getElementById('scenario-section');
+            if (scenarioSection) {
+                scenarioSection.style.display = view === 'scenario' ? 'block' : 'none';
+            }
+
+            // Toggle filter bar visibility (hide in scenario mode)
+            const filterBar = document.getElementById('filter-bar');
+            if (filterBar) {
+                filterBar.style.display = view === 'scenario' ? 'none' : 'flex';
+            }
+            
             if (view === 'constituency') renderConstituency(mapContainer);
-            else renderPartylist(mapContainer);
-            // Re-apply any active filter after re-render
-            if (activeFilter === 'margin') applyMarginFilter();
+            else if (view === 'partylist') renderPartylist(mapContainer);
+            else if (view === 'turnout') renderTurnout(mapContainer);
+            else if (view === 'scenario') renderScenarioMap(mapContainer);
+            
+            // Re-apply any active filter after re-render (not in scenario mode)
+            if (view !== 'scenario' && activeFilter === 'margin') applyMarginFilter();
             
             // Re-apply main map region filter
             const regionSelector = document.getElementById('sidebar-region');
@@ -475,8 +569,7 @@ const provinceGrid = {
 
                 loading.style.display = 'none';
                 document.getElementById('main-layout').style.display = 'flex';
-                document.getElementById('view-toggle').style.display = 'flex';
-                document.getElementById('filter-bar').style.display = 'flex';
+                document.getElementById('controls-bar').style.display = 'flex';
                 mapContainer.style.display = 'grid';
 
                 renderConstituency(mapContainer);
@@ -888,30 +981,26 @@ const provinceGrid = {
         // Custom tooltip for Gap Map
         const gapTooltip = document.createElement('div');
         gapTooltip.id = 'gap-tooltip';
-        gapTooltip.style.position = 'absolute';
-        gapTooltip.style.background = '#0f172a';
-        gapTooltip.style.color = '#f8fafc';
-        gapTooltip.style.padding = '12px 14px';
-        gapTooltip.style.borderRadius = '10px';
-        gapTooltip.style.boxShadow = '0 10px 25px rgba(0,0,0,0.4)';
-        gapTooltip.style.fontSize = '0.85rem';
-        gapTooltip.style.lineHeight = '1.5';
-        gapTooltip.style.pointerEvents = 'none';
-        gapTooltip.style.zIndex = '1000';
-        gapTooltip.style.display = 'none';
-        gapTooltip.style.minWidth = '220px';
-        gapTooltip.style.border = '1px solid #334155';
+        gapTooltip.style.cssText = `
+            position: absolute; z-index:1000; pointer-events:none; display:none;
+            background: rgba(255,255,255,0.98); color:#0f172a;
+            border-radius:12px; padding:12px 16px; font-size:0.85rem;
+            line-height:1.5; min-width:230px; max-width:280px;
+            box-shadow:0 8px 32px rgba(0,0,0,0.12);
+            border:1px solid #e2e8f0;
+            backdrop-filter:blur(16px); font-family:inherit;
+        `;
         document.body.appendChild(gapTooltip);
 
         function attachGapTooltip(seatEl, district, province, t) {
             seatEl.addEventListener('mouseenter', () => {
                 const fmt = n => n.toLocaleString('th-TH');
                 gapTooltip.innerHTML = `
-                    <div style="font-weight:700;margin-bottom:8px;color:#f97316;border-bottom:1px solid #334155;padding-bottom:6px;">⚠️ ${province} เขต ${district}</div>
-                    <div style="display:flex; justify-content:space-between;"><span>คะแนนพรรค:</span> <b style="color:#fbbf24">${fmt(t.plVotes)}</b></div>
-                    <div style="display:flex; justify-content:space-between;"><span>คะแนน สส.:</span> <b style="color:#94a3b8">${fmt(t.csVotes)}</b></div>
-                    <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed #334155;">
-                        <span style="color:#f87171;">Gap สูญเสีย:</span> <b style="color:#ef4444;">${fmt(t.gap)}</b>
+                    <div style="font-weight:700;margin-bottom:8px;color:#f97316;border-bottom:1px solid #e2e8f0;padding-bottom:6px;">⚠️ ${province} เขต ${district}</div>
+                    <div style="display:flex; justify-content:space-between;"><span>คะแนนพรรค:</span> <b style="color:#f97316">${fmt(t.plVotes)}</b></div>
+                    <div style="display:flex; justify-content:space-between;"><span>คะแนน สส.:</span> <b style="color:#64748b">${fmt(t.csVotes)}</b></div>
+                    <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
+                        <span style="color:#ef4444;">Gap สูญเสีย:</span> <b style="color:#dc2626;">${fmt(t.gap)}</b>
                     </div>
                     <div style="margin-top:8px;color:#94a3b8;font-size:0.75rem">ผู้ชนะเขต:<br>${t.csWinnerName} (${t.csWinnerParty})</div>
                 `;
@@ -1213,3 +1302,308 @@ const provinceGrid = {
                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         };
+
+        // ═══════════════════════════════════════════════════════════
+        //   WHAT-IF SCENARIO SIMULATOR
+        // ═══════════════════════════════════════════════════════════
+        let _scenarioResults = null; // cached simulation results
+        let _scenarioFlippableSet = new Set(); // "prov|dist" keys of flippable seats
+
+        function runSimulation(turnoutBoostPct, partySharePct) {
+            buildConstituencyScores();
+            const di = getDistrictInfoMap();
+            const results = [];
+            let totalNonVoters = 0;
+            let totalNewVoters = 0;
+            let totalNewVotes = 0;
+            let currentSeats = 0;
+
+            Object.entries(constituencyScores).forEach(([prov, dists]) => {
+                Object.entries(dists).forEach(([dist, sorted]) => {
+                    const focusIdx = sorted.findIndex(s => s.party === FOCUS_PARTY);
+                    if (focusIdx === -1) return;
+
+                    // Count current seats
+                    if (focusIdx === 0) currentSeats++;
+
+                    // Only simulate for seats we lost
+                    if (focusIdx === 0) return;
+
+                    const key = `${prov}|${dist}`;
+                    const info = di[key] || {};
+                    const nonVoters = Math.max(0, (info.eligible || 0) - (info.voted || 0));
+                    totalNonVoters += nonVoters;
+
+                    const newVoters = Math.round(nonVoters * (turnoutBoostPct / 100));
+                    totalNewVoters += newVoters;
+
+                    const extraVotes = Math.round(newVoters * (partySharePct / 100));
+                    totalNewVotes += extraVotes;
+
+                    const focusD = sorted[focusIdx];
+                    const rival = sorted[0]; // current winner
+                    const originalGap = rival.votes - focusD.votes;
+                    const newFocusVotes = focusD.votes + extraVotes;
+                    const newGap = rival.votes - newFocusVotes;
+                    const canFlip = newGap <= 0;
+
+                    results.push({
+                        prov, dist,
+                        rivalParty: rival.party,
+                        rivalVotes: rival.votes,
+                        rivalName: rival.name,
+                        focusVotes: focusD.votes,
+                        newFocusVotes,
+                        originalGap,
+                        newGap,
+                        canFlip,
+                        nonVoters,
+                        newVoters,
+                        extraVotes,
+                        focusRank: focusIdx + 1
+                    });
+                });
+            });
+
+            // Sort: flippable first (by smallest newGap ascending), then rest
+            results.sort((a, b) => {
+                if (a.canFlip !== b.canFlip) return a.canFlip ? -1 : 1;
+                return a.newGap - b.newGap; // most overturned first for flippable
+            });
+
+            const flippable = results.filter(r => r.canFlip);
+            const projectedSeats = currentSeats + flippable.length;
+
+            _scenarioResults = results;
+            _scenarioFlippableSet = new Set(flippable.map(r => `${r.prov}|${r.dist}`));
+
+            return {
+                results,
+                flippable,
+                currentSeats,
+                projectedSeats,
+                totalNonVoters,
+                totalNewVoters,
+                totalNewVotes
+            };
+        }
+
+        function updateScenarioUI() {
+            const turnoutBoost = parseInt(document.getElementById('slider-turnout').value);
+            const partyShare = parseInt(document.getElementById('slider-party').value);
+
+            // Update slider labels
+            document.getElementById('slider-turnout-val').textContent = `${turnoutBoost}%`;
+            document.getElementById('slider-party-val').textContent = `${partyShare}%`;
+
+            const sim = runSimulation(turnoutBoost, partyShare);
+            const fmt = n => n.toLocaleString('th-TH');
+
+            // Update meta labels
+            document.getElementById('turnout-people-count').textContent = `≈ ${fmt(sim.totalNewVoters)} คน`;
+            document.getElementById('party-votes-count').textContent = `≈ ${fmt(sim.totalNewVotes)} โหวต`;
+
+            // Update result card
+            document.getElementById('stat-flippable').textContent = `+${sim.flippable.length}`;
+            document.getElementById('stat-seats').textContent = `${sim.currentSeats} → ${sim.projectedSeats}`;
+            document.getElementById('stat-new-voters').textContent = fmt(sim.totalNewVoters);
+            document.getElementById('stat-new-votes').textContent = fmt(sim.totalNewVotes);
+
+            // Render sidebar
+            renderScenarioSidebar(sim.flippable);
+
+            // If currently showing scenario map, update it
+            if (currentView === 'scenario') {
+                renderScenarioMap(document.getElementById('map-container'));
+            }
+        }
+
+        function renderScenarioSidebar(flippable) {
+            const container = document.getElementById('scenario-sidebar-list');
+            if (!container) return;
+            const fmt = n => n.toLocaleString('th-TH');
+
+            if (flippable.length === 0) {
+                container.innerHTML = '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:0.85rem;">ปรับ slider เพื่อดูเขตที่สามารถพลิกได้</div>';
+                return;
+            }
+
+            container.innerHTML = flippable.map((t, i) => {
+                const maxV = Math.max(t.newFocusVotes, t.rivalVotes);
+                const fw = maxV > 0 ? (t.newFocusVotes / maxV * 100) : 0;
+                const rw = maxV > 0 ? (t.rivalVotes / maxV * 100) : 0;
+
+                return `<div class="sb-card" data-prov="${t.prov}" data-dist="${t.dist}" onclick="window.zoomToProvinceDistrict('${t.prov}', '${t.dist}')" style="border-left: 4px solid var(--accent); cursor: pointer;">
+                    <div class="sb-card-top">
+                        <div class="sb-rank" style="background:#fff7ed; color:var(--accent); border: 1px solid #ffedd5;">${i + 1}</div>
+                        <div class="sb-info">
+                            <div class="sb-title">${t.prov} เขต ${t.dist}</div>
+                            <div class="sb-meta">⚔️ อันดับ ${t.focusRank} → 🥇 พลิกชนะ!</div>
+                        </div>
+                        <div class="sb-badges">
+                            <span class="sb-badge" style="background:#dcfce7; color:#16a34a; border: 1px solid #bbf7d0;">พลิก ✓</span>
+                        </div>
+                    </div>
+                    <div class="sb-bars">
+                        <div class="sb-bar-row">
+                            <span class="sb-bar-name">ประชาชน</span>
+                            <div class="sb-bar-track">
+                                <div class="sb-bar-fill" style="width:${fw}%; background:var(--accent)">${fmt(t.newFocusVotes)}</div>
+                            </div>
+                        </div>
+                        <div class="sb-bar-row">
+                            <span class="sb-bar-name">${t.rivalParty}</span>
+                            <div class="sb-bar-track">
+                                <div class="sb-bar-fill" style="width:${rw}%; background:${partyHex(t.rivalParty)}">${fmt(t.rivalVotes)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scenario-comparison">
+                        <span class="old-margin">ตามหลัง ${fmt(t.originalGap)}</span>
+                        <span class="arrow">→</span>
+                        <span class="new-margin">นำ +${fmt(Math.abs(t.newGap))}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderScenarioMap(mapContainer) {
+            // Render base constituency map first
+            buildConstituencyScores();
+            mapContainer.innerHTML = '';
+
+            Object.keys(provincesData).forEach(province => {
+                const el = createProvinceEl(province);
+                const seatsContainer = document.createElement('div');
+                seatsContainer.className = 'seats-container';
+
+                const sorted = [...provincesData[province]].sort((a, b) =>
+                    parseInt(a.district) - parseInt(b.district));
+
+                sorted.forEach(seat => {
+                    const seatEl = document.createElement('div');
+                    seatEl.className = 'seat';
+                    seatEl.dataset.district = seat.district;
+                    seatEl.textContent = seat.district;
+                    
+                    const scores = (constituencyScores[province] || {})[seat.district] || [];
+                    let bg = getPartyColor(seat.party);
+                    seatEl.style.color = '#fff';
+
+                    // Apply saturation for focus party wins
+                    if (seat.party === FOCUS_PARTY && scores.length > 1 && scores[0].party === FOCUS_PARTY) {
+                        const total = scores.reduce((sum, s) => sum + s.votes, 0);
+                        if (total > 0) {
+                            const marginPct = (scores[0].votes - scores[1].votes) / total;
+                            if (marginPct < 0.05) { bg = '#fdba74'; seatEl.style.color = '#7c2d12'; }
+                            else if (marginPct < 0.15) { bg = '#fb923c'; }
+                            else { bg = '#ff5a00'; }
+                        }
+                    }
+                    
+                    seatEl.style.backgroundColor = bg;
+
+                    // Highlight flippable seats
+                    const key = `${province}|${seat.district}`;
+                    if (_scenarioFlippableSet.has(key)) {
+                        seatEl.classList.add('can-flip');
+                        // Find the result data for this seat
+                        const simResult = (_scenarioResults || []).find(r => r.prov === province && r.dist === seat.district);
+                        if (simResult) {
+                            attachScenarioTooltip(seatEl, simResult);
+                        }
+                    } else {
+                        // Normal tooltips for non-flippable seats
+                        attachTooltip(seatEl, seat.district, province, () => scores);
+                    }
+
+                    seatEl.addEventListener('click', () => {
+                        window.highlightSidebarCard(province, seat.district);
+                        if (window.zoomToProvinceDistrict) window.zoomToProvinceDistrict(province, seat.district);
+                    });
+                    seatsContainer.appendChild(seatEl);
+                });
+
+                el.appendChild(seatsContainer);
+                mapContainer.appendChild(el);
+            });
+        }
+
+        function attachScenarioTooltip(seatEl, simResult) {
+            const fmt = n => n.toLocaleString('th-TH');
+            seatEl.addEventListener('mouseenter', () => {
+                tooltip.innerHTML = `
+                    <div style="font-weight:700;margin-bottom:6px;color:var(--accent);border-bottom:1px solid #e2e8f0;padding-bottom:6px;">🎯 ${simResult.prov} เขต ${simResult.dist}</div>
+                    <div style="font-size:0.72rem;color:#16a34a;font-weight:700;margin-bottom:8px;">✨ พลิกได้ในสถานการณ์จำลอง!</div>
+                    <div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:3px;">
+                        <span>คะแนนเดิม (ประชาชน):</span> <b>${fmt(simResult.focusVotes)}</b>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:3px;">
+                        <span>โหวตเพิ่ม:</span> <b style="color:var(--accent)">+${fmt(simResult.extraVotes)}</b>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:3px;">
+                        <span>คะแนนใหม่:</span> <b style="color:#16a34a">${fmt(simResult.newFocusVotes)}</b>
+                    </div>
+                    <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #e2e8f0;">
+                        <div style="display:flex;justify-content:space-between;">
+                            <span>คู่แข่ง (${simResult.rivalParty}):</span> <b>${fmt(simResult.rivalVotes)}</b>
+                        </div>
+                    </div>
+                    <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #e2e8f0;">
+                        <span style="text-decoration:line-through;color:#94a3b8;">ตามหลัง ${fmt(simResult.originalGap)}</span>
+                        <span style="color:var(--accent);font-weight:700;"> → </span>
+                        <span style="color:#16a34a;font-weight:800;">นำ +${fmt(Math.abs(simResult.newGap))}</span>
+                    </div>
+                `;
+                tooltip.style.display = 'block';
+            });
+            seatEl.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
+        }
+
+        function showScenarioOnMap() {
+            setView('scenario');
+            document.getElementById('main-layout').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetScenario() {
+            document.getElementById('slider-turnout').value = 15;
+            document.getElementById('slider-party').value = 60;
+            updateScenarioUI();
+        }
+
+        // ── Wire up sliders with debounce ──
+        (function initScenarioSliders() {
+            let debounceTimer = null;
+            const debounce = (fn, delay) => {
+                return () => {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(fn, delay);
+                };
+            };
+
+            const debouncedUpdate = debounce(() => updateScenarioUI(), 300);
+
+            // Wait for DOM to be ready
+            const tryWire = () => {
+                const s1 = document.getElementById('slider-turnout');
+                const s2 = document.getElementById('slider-party');
+                if (!s1 || !s2) {
+                    setTimeout(tryWire, 100);
+                    return;
+                }
+                s1.addEventListener('input', () => {
+                    document.getElementById('slider-turnout-val').textContent = `${s1.value}%`;
+                    debouncedUpdate();
+                });
+                s2.addEventListener('input', () => {
+                    document.getElementById('slider-party-val').textContent = `${s2.value}%`;
+                    debouncedUpdate();
+                });
+
+                // Run initial simulation
+                updateScenarioUI();
+            };
+            tryWire();
+        })();
