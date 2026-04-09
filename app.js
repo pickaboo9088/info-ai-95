@@ -366,82 +366,24 @@ const provinceGrid = {
             return el;
         }
 
-        // ── Render Turnout Heatmap view (Non-voters) ─────────────────────
-        function renderTurnout(mapContainer) {
-            buildConstituencyScores();
-            const di = getDistrictInfoMap();
-            mapContainer.innerHTML = '';
-            
-            Object.keys(provincesData).forEach(province => {
-                const el = createProvinceEl(province);
-                const seatsContainer = document.createElement('div');
-                seatsContainer.className = 'seats-container';
 
-                const sorted = [...provincesData[province]].sort((a, b) =>
-                    parseInt(a.district) - parseInt(b.district));
-
-                sorted.forEach(seat => {
-                    const seatEl = document.createElement('div');
-                    seatEl.className = 'seat';
-                    seatEl.dataset.district = seat.district;
-                    seatEl.textContent = seat.district;
-                    
-                    const key = `${province}|${seat.district}`;
-                    const info = di[key] || {};
-                    let nonVoterPct = 0;
-                    if (info.eligible > 0) nonVoterPct = 1 - (info.voted / info.eligible);
-                    
-                    // Heatmap logic for non-voters (higher non-voters = darker red)
-                    let bg = '#fee2e2'; seatEl.style.color = '#7f1d1d';
-                    if (nonVoterPct > 0.35) { bg = '#7f1d1d'; seatEl.style.color = '#fff'; }
-                    else if (nonVoterPct > 0.28) { bg = '#b91c1c'; seatEl.style.color = '#fff'; }
-                    else if (nonVoterPct > 0.22) { bg = '#ef4444'; seatEl.style.color = '#fff'; }
-                    else if (nonVoterPct > 0.15) { bg = '#fca5a5'; seatEl.style.color = '#7f1d1d'; }
-
-                    seatEl.style.backgroundColor = bg;
-                    
-                    // Mark if Prachachon lost
-                    const csScores = (constituencyScores[province] || {})[seat.district] || [];
-                    if (csScores.length > 0 && csScores[0].party !== FOCUS_PARTY) {
-                        seatEl.classList.add('lost');
-                    }
-
-                    attachTooltip(seatEl, seat.district, province, () => csScores);
-                    
-                    seatEl.addEventListener('click', () => {
-                        window.highlightSidebarCard(province, seat.district);
-                        if (window.zoomToProvinceDistrict) window.zoomToProvinceDistrict(province, seat.district);
-                    });
-                    seatsContainer.appendChild(seatEl);
-                });
-
-                el.appendChild(seatsContainer);
-                mapContainer.appendChild(el);
-            });
-        }
 
         // ── Public toggle function (called from HTML buttons) ─────────────
         function setView(view) {
             currentView = view;
             const mapContainer = document.getElementById('map-container');
             document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${view}`).classList.add('active');
+            const targetBtn = document.getElementById(`btn-${view}`);
+            if (targetBtn) targetBtn.classList.add('active');
 
-            // Toggle scenario section visibility
-            const scenarioSection = document.getElementById('scenario-section');
-            if (scenarioSection) {
-                scenarioSection.style.display = view === 'scenario' ? 'block' : 'none';
-            }
-
-            // Toggle filter bar visibility (hide in scenario mode)
+            // Toggle filter bar visibility
             const filterBar = document.getElementById('filter-bar');
             if (filterBar) {
-                filterBar.style.display = view === 'scenario' ? 'none' : 'flex';
+                filterBar.style.display = 'flex';
             }
             
             if (view === 'constituency') renderConstituency(mapContainer);
             else if (view === 'partylist') renderPartylist(mapContainer);
-            else if (view === 'turnout') renderTurnout(mapContainer);
             else if (view === 'scenario') renderScenarioMap(mapContainer);
             
             // Re-apply any active filter after re-render (not in scenario mode)
@@ -753,7 +695,6 @@ const provinceGrid = {
                         </div>
                         <div class="sb-badges">
                             <span class="sb-badge margin">${t.marginPct.toFixed(1)}%</span>
-                            <span class="sb-badge turnout">TO ${t.turnoutPct.toFixed(0)}%</span>
                         </div>
                     </div>
                     <div class="sb-bars">
@@ -1409,13 +1350,69 @@ const provinceGrid = {
             document.getElementById('stat-new-voters').textContent = fmt(sim.totalNewVoters);
             document.getElementById('stat-new-votes').textContent = fmt(sim.totalNewVotes);
 
+
+
             // Render sidebar
             renderScenarioSidebar(sim.flippable);
+            
+            // Render Mini Map
+            const miniMapContainer = document.getElementById('scenario-mini-map');
+            if (miniMapContainer) {
+                renderScenarioMiniMap(miniMapContainer, sim.flippable);
+            }
 
-            // If currently showing scenario map, update it
+            // If currently showing scenario map in background, update it
             if (currentView === 'scenario') {
                 renderScenarioMap(document.getElementById('map-container'));
             }
+        }
+
+        function renderScenarioMiniMap(container, flippable) {
+            // Build the map DOM only once
+            if (container.children.length === 0) {
+                Object.keys(provincesData).forEach(province => {
+                    const el = createProvinceEl(province);
+                    const seatsContainer = document.createElement('div');
+                    seatsContainer.className = 'seats-container';
+
+                    const sorted = [...provincesData[province]].sort((a, b) => 
+                        parseInt(a.district) - parseInt(b.district));
+
+                    sorted.forEach(seat => {
+                        const seatEl = document.createElement('div');
+                        seatEl.className = 'seat';
+                        seatEl.dataset.prov = province;
+                        seatEl.dataset.dist = seat.district;
+                        seatEl.dataset.party = seat.party;
+                        
+                        seatsContainer.appendChild(seatEl);
+                    });
+                    el.appendChild(seatsContainer);
+                    container.appendChild(el);
+                });
+            }
+
+            // Update styles only
+            const flipKeys = new Set(flippable.map(f => `${f.prov}|${f.dist}`));
+            const allSeats = container.querySelectorAll('.seat');
+            
+            allSeats.forEach(seatEl => {
+                const isFlipped = flipKeys.has(`${seatEl.dataset.prov}|${seatEl.dataset.dist}`);
+                
+                if (isFlipped) {
+                    seatEl.style.backgroundColor = 'var(--accent)';
+                    seatEl.classList.add('can-flip');
+                    seatEl.style.opacity = '1';
+                } else if (seatEl.dataset.party === FOCUS_PARTY) {
+                    seatEl.style.backgroundColor = 'var(--accent)';
+                    seatEl.classList.remove('can-flip');
+                    seatEl.style.opacity = '0.3';
+                } else {
+                    seatEl.style.backgroundColor = '#e2e8f0';
+                    seatEl.classList.remove('can-flip');
+                    seatEl.style.opacity = '1';
+                }
+            });
         }
 
         function renderScenarioSidebar(flippable) {
@@ -1513,6 +1510,8 @@ const provinceGrid = {
                             attachScenarioTooltip(seatEl, simResult);
                         }
                     } else {
+                        // Light out other seats
+                        seatEl.classList.add('dimmed');
                         // Normal tooltips for non-flippable seats
                         attachTooltip(seatEl, seat.district, province, () => scores);
                     }
@@ -1562,7 +1561,58 @@ const provinceGrid = {
             });
         }
 
-        function showScenarioOnMap() {
+        window.scenarioPanzoom = null;
+
+        window.openScenarioModal = function() {
+            document.getElementById('scenario-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent Scroll
+            updateScenarioUI();
+
+            // Initialize Panzoom for Mini Map only once when modal opens
+            const mapContainer = document.getElementById('scenario-mini-map');
+            if (mapContainer && typeof Panzoom !== 'undefined' && !window.scenarioPanzoom) {
+                // Determine scale to fit
+                const wrapperW = mapContainer.parentElement.clientWidth || 400;
+                const wrapperH = mapContainer.parentElement.clientHeight || 400;
+                const mapW = mapContainer.scrollWidth || 300;
+                const mapH = mapContainer.scrollHeight || 500;
+                
+                const scaleToFit = Math.min(wrapperW / mapW, wrapperH / mapH) * 0.95;
+                const defaultScale = Math.max(0.1, Math.min(scaleToFit, 2));
+
+                mapContainer.style.transformOrigin = 'center center';
+                
+                window.scenarioPanzoom = Panzoom(mapContainer, {
+                    maxScale: 6,
+                    minScale: 0.2,
+                    startScale: defaultScale,
+                    startX: 0,
+                    startY: 0,
+                    canvas: true,
+                    cursor: 'grab'
+                });
+                
+                mapContainer.parentElement.addEventListener('wheel', function(e) {
+                    e.preventDefault();
+                    window.scenarioPanzoom.zoomWithWheel(e);
+                }, { passive: false });
+
+                const btnReset = document.getElementById('reset-mini-map-btn');
+                if (btnReset) {
+                    btnReset.addEventListener('click', () => {
+                        window.scenarioPanzoom.reset();
+                    });
+                }
+            }
+        };
+
+        window.closeScenarioModal = function() {
+            document.getElementById('scenario-modal').style.display = 'none';
+            document.body.style.overflow = '';
+        };
+
+        function showScenarioResultsOnMap() {
+            closeScenarioModal();
             setView('scenario');
             document.getElementById('main-layout').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }

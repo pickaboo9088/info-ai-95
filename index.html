@@ -47,21 +47,7 @@
 
     <!-- ═══ CONTROLS BAR ═══ -->
     <div class="controls-bar" id="controls-bar" style="display:none;">
-        <!-- View Toggle -->
-        <div class="view-toggle" id="view-toggle">
-            <button id="btn-constituency" class="toggle-btn active" onclick="setView('constituency')">
-                <span class="toggle-icon">🗺️</span> แบ่งเขต
-            </button>
-            <button id="btn-partylist" class="toggle-btn" onclick="setView('partylist')">
-                <span class="toggle-icon">📋</span> ปาร์ตี้ลิสต์
-            </button>
-            <button id="btn-turnout" class="toggle-btn" onclick="setView('turnout')">
-                <span class="toggle-icon">🔥</span> Turnout Heatmap
-            </button>
-            <button id="btn-scenario" class="toggle-btn" onclick="setView('scenario')">
-                <span class="toggle-icon">🎯</span> จำลองสถานการณ์
-            </button>
-        </div>
+        
 
         <!-- Filter Chips -->
         <div class="filter-bar" id="filter-bar">
@@ -73,9 +59,9 @@
                 <option value="0.05">5%</option>
                 <option value="0.10">10%</option>
             </select>
-            <button id="filter-clear" class="filter-chip filter-clear" onclick="clearFilter()"
-                style="display:none;">
-                ✕ ล้าง
+            <button id="filter-clear" class="filter-chip filter-clear" onclick="clearFilter()" style="display:none;">✕ ล้าง</button>
+            <button id="btn-open-simulator" class="filter-chip active" style="margin-left:auto; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border: none;" onclick="openScenarioModal()">
+                <span class="toggle-icon">🎯</span> จำลองสถานการณ์
             </button>
         </div>
     </div>
@@ -83,6 +69,16 @@
     <!-- ═══ MAIN LAYOUT: Map + Sidebar ═══ -->
     <div class="main-layout" id="main-layout" style="display: none;">
         <div class="map-wrapper" id="map-wrapper">
+            <div class="map-toolbar left">
+                <div class="view-toggle" id="view-toggle">
+                    <button id="btn-constituency" class="toggle-btn active" onclick="setView('constituency')">
+                        <span class="toggle-icon">🗺️</span> แบ่งเขต
+                    </button>
+                    <button id="btn-partylist" class="toggle-btn" onclick="setView('partylist')">
+                        <span class="toggle-icon">📋</span> ปาร์ตี้ลิสต์
+                    </button>
+                </div>
+            </div>
             <div class="map-toolbar">
                 <button id="reset-map-btn" class="toolbar-btn">
                     🔄 Reset
@@ -121,86 +117,108 @@
         </div>
     </div>
 
-    <!-- ═══ SCENARIO SIMULATOR SECTION ═══ -->
-    <div class="scenario-section" id="scenario-section" style="display:none;">
-        <div class="section-divider">
-            <div class="divider-line"></div>
-            <span class="divider-label">WHAT-IF SIMULATOR</span>
-            <div class="divider-line"></div>
-        </div>
+    <!-- ═══ SCENARIO SIMULATOR MODAL ═══ -->
+    <div id="scenario-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeScenarioModal()">✕</button>
+            
+            <div class="scenario-section" id="scenario-section">
+                <div class="section-divider">
+                    <div class="divider-line"></div>
+                    <span class="divider-label">WHAT-IF SIMULATOR</span>
+                    <div class="divider-line"></div>
+                </div>
 
-        <div class="scenario-header-card">
-            <div class="gap-header-icon">🎯</div>
-            <div class="gap-header-text">
-                <h2>จำลองสถานการณ์</h2>
-                <p>หากดึงผู้ไม่มาใช้สิทธิกลับมา แล้วสมมติว่าสัดส่วนหนึ่งโหวตให้พรรคประชาชน — <span class="text-accent">จะพลิกได้กี่เขต?</span></p>
-            </div>
-        </div>
-
-        <div class="scenario-layout">
-            <!-- Controls Panel -->
-            <div class="scenario-controls-panel">
-                <div class="scenario-slider-group">
-                    <div class="scenario-slider-header">
-                        <label for="slider-turnout">🗳️ ดึงผู้ไม่ใช้สิทธิกลับมา</label>
-                        <span class="scenario-slider-value" id="slider-turnout-val">15%</span>
-                    </div>
-                    <input type="range" id="slider-turnout" class="scenario-slider" min="0" max="50" value="15" step="1">
-                    <div class="scenario-slider-meta">
-                        <span>0%</span>
-                        <span id="turnout-people-count">≈ กำลังคำนวณ...</span>
-                        <span>50%</span>
+                <div class="scenario-header-card">
+                    <div class="gap-header-icon">🎯</div>
+                    <div class="gap-header-text">
+                        <h2>จำลองสถานการณ์</h2>
+                        <p>หากดึงผู้ไม่มาใช้สิทธิกลับมา แล้วสมมติว่าสัดส่วนหนึ่งโหวตให้พรรคประชาชน — <span class="text-accent">จะพลิกได้กี่เขต?</span></p>
                     </div>
                 </div>
 
-                <div class="scenario-slider-group">
-                    <div class="scenario-slider-header">
-                        <label for="slider-party">🧡 สมมติโหวตให้พรรคประชาชน</label>
-                        <span class="scenario-slider-value" id="slider-party-val">60%</span>
-                    </div>
-                    <input type="range" id="slider-party" class="scenario-slider" min="0" max="100" value="60" step="1">
-                    <div class="scenario-slider-meta">
-                        <span>0%</span>
-                        <span id="party-votes-count">≈ กำลังคำนวณ...</span>
-                        <span>100%</span>
-                    </div>
-                </div>
+                <div class="scenario-layout">
+                    <!-- Controls Panel -->
+                    <div class="scenario-controls-panel">
+                        <div class="scenario-slider-group">
+                            <div class="scenario-slider-header">
+                                <label for="slider-turnout">🗳️ ดึงผู้ไม่ใช้สิทธิกลับมา</label>
+                                <span class="scenario-slider-value" id="slider-turnout-val">15%</span>
+                            </div>
+                            <input type="range" id="slider-turnout" class="scenario-slider" min="0" max="50" value="15" step="1">
+                            <div class="scenario-slider-meta">
+                                <span>0%</span>
+                                <span id="turnout-people-count">≈ กำลังคำนวณ...</span>
+                                <span>50%</span>
+                            </div>
+                        </div>
 
-                <!-- Result Summary -->
-                <div class="scenario-result-card" id="scenario-result-card">
-                    <div class="scenario-result-header">📈 ผลลัพธ์การจำลอง</div>
-                    <div class="scenario-result-grid">
-                        <div class="scenario-stat">
-                            <div class="scenario-stat-value" id="stat-flippable">—</div>
-                            <div class="scenario-stat-label">เขตที่พลิกได้</div>
+                        <div class="scenario-slider-group">
+                            <div class="scenario-slider-header">
+                                <label for="slider-party">🧡 สมมติโหวตให้พรรคประชาชน</label>
+                                <span class="scenario-slider-value" id="slider-party-val">60%</span>
+                            </div>
+                            <input type="range" id="slider-party" class="scenario-slider" min="0" max="100" value="60" step="1">
+                            <div class="scenario-slider-meta">
+                                <span>0%</span>
+                                <span id="party-votes-count">≈ กำลังคำนวณ...</span>
+                                <span>100%</span>
+                            </div>
                         </div>
-                        <div class="scenario-stat">
-                            <div class="scenario-stat-value" id="stat-seats">— → —</div>
-                            <div class="scenario-stat-label">ที่นั่งรวม (ก่อน → หลัง)</div>
-                        </div>
-                        <div class="scenario-stat">
-                            <div class="scenario-stat-value" id="stat-new-voters">—</div>
-                            <div class="scenario-stat-label">ผู้มาใช้สิทธิใหม่</div>
-                        </div>
-                        <div class="scenario-stat">
-                            <div class="scenario-stat-value" id="stat-new-votes">—</div>
-                            <div class="scenario-stat-label">โหวตให้พรรค</div>
-                        </div>
-                    </div>
-                    <div class="scenario-actions">
-                        <button class="scenario-btn primary" onclick="showScenarioOnMap()">✨ แสดงบนแผนที่</button>
-                        <button class="scenario-btn secondary" onclick="resetScenario()">🔄 รีเซ็ต</button>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Flippable Seats Sidebar -->
-            <div class="ranking-sidebar scenario-sidebar-theme" id="scenario-sidebar">
-                <div class="sidebar-header scenario-sidebar-header">
-                    <h3>⚡ เขตที่พลิกได้</h3>
-                </div>
-                <div class="sidebar-list" id="scenario-sidebar-list">
-                    <!-- Flippable seat cards injected here -->
+                        <!-- Result Summary -->
+                        <div class="scenario-result-card" id="scenario-result-card">
+                            <div class="scenario-result-header">📈 ผลลัพธ์การจำลอง</div>
+                            <div class="scenario-result-grid">
+                                <div class="scenario-stat">
+                                    <div class="scenario-stat-value" id="stat-flippable">—</div>
+                                    <div class="scenario-stat-label">เขตที่พลิกได้</div>
+                                </div>
+                                <div class="scenario-stat">
+                                    <div class="scenario-stat-value" id="stat-seats">— → —</div>
+                                    <div class="scenario-stat-label">ที่นั่งรวม (ก่อน → หลัง)</div>
+                                </div>
+                                <div class="scenario-stat">
+                                    <div class="scenario-stat-value" id="stat-new-voters">—</div>
+                                    <div class="scenario-stat-label">ผู้มาใช้สิทธิใหม่</div>
+                                </div>
+                                <div class="scenario-stat">
+                                    <div class="scenario-stat-value" id="stat-new-votes">—</div>
+                                    <div class="scenario-stat-label">โหวตให้พรรค</div>
+                                </div>
+                            </div>
+                            <div class="scenario-actions">
+                                <button class="scenario-btn primary" onclick="showScenarioResultsOnMap()">✨ ตรวจสอบบนแผนที่</button>
+                                <button class="scenario-btn secondary" onclick="resetScenario()">🔄 รีเซ็ต</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tactical Map Panel -->
+                    <div class="scenario-map-panel">
+
+                        <div class="mini-map-wrapper" id="scenario-map-wrapper">
+                            <div class="map-toolbar right">
+                                <button id="reset-mini-map-btn" class="toolbar-btn">
+                                    🔄 Reset
+                                </button>
+                            </div>
+                            <div class="map-hint">Scroll = Zoom · Drag = Pan</div>
+                            <div id="scenario-mini-map" class="mini-map-container">
+                                <!-- Mini map injected here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flippable Seats Sidebar -->
+                    <div class="ranking-sidebar scenario-sidebar-theme" id="scenario-sidebar">
+                        <div class="sidebar-header scenario-sidebar-header">
+                            <h3>⚡ เขตที่พลิกได้</h3>
+                        </div>
+                        <div class="sidebar-list" id="scenario-sidebar-list">
+                            <!-- Flippable seat cards injected here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -227,42 +227,50 @@ body {
 
 .view-toggle {
     display: flex;
-    gap: 4px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 4px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-subtle);
+    gap: 0;
+    background: #ffffff;
+    padding: 0;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-medium);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .toggle-btn {
-    padding: 8px 18px;
+    padding: 6px 12px;
     border: none;
-    border-radius: 10px;
+    border-right: 1px solid var(--border-subtle);
+    border-radius: 0;
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
     background: transparent;
     color: var(--text-secondary);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
+}
+
+.toggle-btn:last-child {
+    border-right: none;
 }
 
 .toggle-btn:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--accent);
+    background: #f8fafc;
 }
 
 .toggle-btn.active {
     background: var(--accent);
     color: #ffffff;
-    box-shadow: 0 4px 16px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.15);
+    box-shadow: none;
 }
 
 .toggle-icon {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 /* Filter Bar */
@@ -376,6 +384,11 @@ body {
     z-index: 100;
     display: flex;
     gap: 6px;
+}
+
+.map-toolbar.left {
+    right: auto;
+    left: 12px;
 }
 
 .toolbar-btn {
@@ -497,22 +510,7 @@ body {
     z-index: 20;
 }
 
-.seat.lost {
-    position: relative;
-    box-shadow: inset 0 0 0 2px var(--danger);
-}
 
-.seat.lost::after {
-    content: "✕";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 0.55rem;
-    color: var(--danger);
-    font-weight: 900;
-    opacity: 0.85;
-}
 
 /* Partylist view styles */
 .partylist-block {
@@ -1062,13 +1060,75 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
+    MODAL SYSTEM
+   ═══════════════════════════════════════════════════════════ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background: #ffffff;
+    width: 95vw;
+    max-width: 1600px;
+    height: 90vh;
+    border-radius: var(--radius-xl);
+    position: relative;
+    padding: 2.5rem;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.modal-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-medium);
+    background: #ffffff;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.modal-close:hover {
+    background: var(--bg-secondary);
+    transform: rotate(90deg);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════
    SCENARIO SIMULATOR
    ═══════════════════════════════════════════════════════════ */
 .scenario-section {
-    padding: 0 1rem 2rem;
-    max-width: 1700px;
-    width: 98vw;
-    margin: 0 auto;
+    padding: 0;
+    width: 100%;
+    margin: 0;
 }
 
 .scenario-header-card {
@@ -1090,9 +1150,10 @@ body {
 
 .scenario-layout {
     display: flex;
-    gap: 16px;
+    gap: 24px;
     width: 100%;
-    align-items: flex-start;
+    align-items: stretch;
+    min-height: 600px;
 }
 
 .scenario-controls-panel {
@@ -1293,6 +1354,192 @@ body {
 .scenario-btn.secondary:hover {
     background: var(--border-subtle);
     color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL TACTICAL PANEL (Center)
+   ═══════════════════════════════════════════════════════════ */
+.scenario-map-panel {
+    flex: 1.5;
+    background: #f8fafc;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    padding: 0; /* Remove padding to maximize map space */
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Floating Seat Comparison HUD */
+.seat-comparison-hud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.comparison-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.donut-layout {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 10px 0;
+}
+
+.donut-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+}
+
+.donut-svg {
+    transform: rotate(-90deg);
+}
+
+.donut-base {
+    fill: none;
+    stroke: #f1f5f9;
+    stroke-width: 8;
+}
+
+.donut-segment {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    stroke-dasharray: 283; /* 2 * PI * 45 */
+}
+
+.donut-segment.current {
+    stroke: #94a3b8;
+}
+
+.donut-segment.projected {
+    stroke: var(--accent);
+}
+
+.donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.donut-center .total-val {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.donut-center .divider {
+    width: 40px;
+    height: 2px;
+    background: var(--border-medium);
+    margin: 4px 0;
+}
+
+.donut-center .max-val {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.donut-stats {
+    flex: 1;
+}
+
+.donut-stats .percent-val {
+    font-size: 2.2rem;
+    font-weight: 950;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.donut-stats .percent-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.comparison-footer {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #fff7ed;
+    color: #c2410c;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    border: 1px solid #ffedd5;
+}
+
+/* Mini Map Wrapper & Container */
+.mini-map-wrapper {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.mini-map-container {
+    width: 100%;
+    height: 100%; /* Will scale with panzoom */
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    grid-auto-rows: min-content;
+    gap: 4px;
+    padding: 20px;
+    align-content: center;
+    justify-content: center;
+}
+
+.mini-map-container .province {
+    gap: 2px !important;
+    padding: 2px !important;
+}
+
+.mini-map-container .province-name {
+    font-size: 0.25rem !important;
+    margin-bottom: 0px !important;
+    display: none; /* Hide names in mini map for cleanliness */
+}
+
+.mini-map-container .seat {
+    width: 7px !important;
+    height: 7px !important;
+    font-size: 0px !important;
+    border-radius: 1px !important;
+    box-shadow: none !important;
+}
+
+.mini-map-container .seat.can-flip {
+    background: var(--accent) !important;
+    transform: scale(1.4);
+    z-index: 10;
+    box-shadow: 0 0 12px var(--accent) !important;
+    border: 1px solid #ffffff !important;
 }
 
 /* Scenario Sidebar Theme */
