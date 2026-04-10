@@ -214,15 +214,7 @@ const provinceGrid = {
                     let bg = getPartyColor(seat.party);
                     seatEl.style.color = '#fff';
 
-                    if (seat.party === FOCUS_PARTY && scores.length > 1 && scores[0].party === FOCUS_PARTY) {
-                        const total = scores.reduce((sum, s) => sum + s.votes, 0);
-                        if (total > 0) {
-                            const marginPct = (scores[0].votes - scores[1].votes) / total;
-                            if (marginPct < 0.05) { bg = '#fdba74'; seatEl.style.color = '#7c2d12'; }
-                            else if (marginPct < 0.15) { bg = '#fb923c'; }
-                            else { bg = '#ff5a00'; }
-                        }
-                    }
+
                     
                     seatEl.style.backgroundColor = bg;
                     attachTooltip(seatEl, seat.district, province, () => scores);
@@ -313,15 +305,7 @@ const provinceGrid = {
                     let bg = getPartyColor(plParty);
                     seatEl.style.color = '#fff';
 
-                    if (plParty === FOCUS_PARTY && scores.length > 1 && scores[0].party === FOCUS_PARTY) {
-                        const total = scores.reduce((sum, s) => sum + s.votes, 0);
-                        if (total > 0) {
-                            const marginPct = (scores[0].votes - scores[1].votes) / total;
-                            if (marginPct < 0.05) { bg = '#fdba74'; seatEl.style.color = '#7c2d12'; }
-                            else if (marginPct < 0.15) { bg = '#fb923c'; }
-                            else { bg = '#ff5a00'; }
-                        }
-                    }
+
 
                     seatEl.style.backgroundColor = bg;
                     attachTooltip(seatEl, seat.district, province, () => scores);
@@ -1487,16 +1471,7 @@ const provinceGrid = {
                     let bg = getPartyColor(seat.party);
                     seatEl.style.color = '#fff';
 
-                    // Apply saturation for focus party wins
-                    if (seat.party === FOCUS_PARTY && scores.length > 1 && scores[0].party === FOCUS_PARTY) {
-                        const total = scores.reduce((sum, s) => sum + s.votes, 0);
-                        if (total > 0) {
-                            const marginPct = (scores[0].votes - scores[1].votes) / total;
-                            if (marginPct < 0.05) { bg = '#fdba74'; seatEl.style.color = '#7c2d12'; }
-                            else if (marginPct < 0.15) { bg = '#fb923c'; }
-                            else { bg = '#ff5a00'; }
-                        }
-                    }
+
                     
                     seatEl.style.backgroundColor = bg;
 
