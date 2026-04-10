@@ -41,17 +41,18 @@ const provinceGrid = {
 
         function getPartyColor(partyName) {
             const colors = {
-                "ประชาชน": "var(--party-prachachon)",
-                "เพื่อไทย": "var(--party-pheuthai)",
-                "ภูมิใจไทย": "var(--party-bhumjaithai)",
-                "กล้าธรรม": "var(--party-klatham)",
-                "พลังประชารัฐ": "var(--party-palangpracharath)",
-                "ประชาธิปัตย์": "var(--party-democrat)",
-                "ไทรวมพลัง": "var(--party-ruamthai)",
-                "ประชาชาติ": "var(--party-prachachat)",
-                "ไทยสร้างไทย": "var(--party-thaisangthai)"
+                "ประชาชน": "#ff5a00",
+                "เพื่อไทย": "#ef4444",
+                "ภูมิใจไทย": "#1e3a8a",
+                "กล้าธรรม": "#84cc16",
+                "พลังประชารัฐ": "#166534",
+                "ประชาธิปัตย์": "#38bdf8",
+                "ไทรวมพลัง": "#db2777",
+                "ประชาชาติ": "#b45309",
+                "ไทยสร้างไทย": "#9333ea",
+                "โอกาสใหม่": "#64748b"
             };
-            return colors[partyName] || "var(--party-default)";
+            return colors[partyName] || "#94a3b8";
         }
 
         
@@ -213,9 +214,6 @@ const provinceGrid = {
                     const scores = (constituencyScores[province] || {})[seat.district] || [];
                     let bg = getPartyColor(seat.party);
                     seatEl.style.color = '#fff';
-
-
-                    
                     seatEl.style.backgroundColor = bg;
                     attachTooltip(seatEl, seat.district, province, () => scores);
                     seatEl.addEventListener('click', () => {
@@ -304,9 +302,6 @@ const provinceGrid = {
                     const scores = (partylistScores && partylistScores[province] && partylistScores[province][seat.district]) || [];
                     let bg = getPartyColor(plParty);
                     seatEl.style.color = '#fff';
-
-
-
                     seatEl.style.backgroundColor = bg;
                     attachTooltip(seatEl, seat.district, province, () => scores);
                     seatEl.addEventListener('click', () => {
@@ -1470,9 +1465,6 @@ const provinceGrid = {
                     const scores = (constituencyScores[province] || {})[seat.district] || [];
                     let bg = getPartyColor(seat.party);
                     seatEl.style.color = '#fff';
-
-
-                    
                     seatEl.style.backgroundColor = bg;
 
                     // Highlight flippable seats
